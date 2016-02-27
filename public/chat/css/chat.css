@@ -1,0 +1,36 @@
+.footer{
+  position:fixed;
+  bottom:0px;
+  height:50px;
+}
+div.main>div.message{
+  height:600px;
+  margin-bottom:50px;
+  overflow-y:scroll;
+
+}
+.msg_row{
+    padding:10px;
+    clear:both;
+}
+.name{
+  font-size:large;
+  width:100px;
+}
+.nickname{
+  color:rgba(0,255,0,0.8);
+  float:left;
+}
+.message_text{
+  word-break:break-all;
+  width:500px;
+}
+.t{
+  float:right;
+  width:50px;
+  margin-right:10px;
+}
+.wrap{
+  word-break:break-all;
+  width:200px;
+}

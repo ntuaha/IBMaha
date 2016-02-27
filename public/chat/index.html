@@ -1,0 +1,197 @@
+<!doctype html>
+<html>
+  <head>
+    <title>ESB Golden Seed Office</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="./css/chat.css">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./js/chat.js"></script>
+
+  </head>
+  <body>
+    <div class="container-fulid">
+      <!-- user login -->
+      <div class="row login">
+        <div class="col-sm-9 col-md-9 col-sm-offset-1 col-md-offset-1">
+          <form>
+            <label>使用者</label>
+            <input type="text" class="form-control" placeholder="user" id="user">
+            <label>暱稱</label>
+            <input type="text" class="form-control" placeholder="nickname" id="nickname">
+            <label>送出</label>
+            <input type="submit" class="login btn btn-default btn-lg btn-block" val="login"></div>
+          </form>
+        </div>
+      </div>
+      <div class="row talk">
+        <!--倒數計時 -->
+        <div class="col-md-10 col-md-offset-1 col-sm-10 col-sm-offset-1">
+          <H1 class="ALERT"></H1>
+        </div>
+        <div class="col-sm-9 col-md-9 col-sm-offset-1 col-md-offset-1">
+          <!--訊息主頁 -->
+          <div class="row main">
+            <!--List-->
+            <div class="col-md-4 col-sm-4">
+              <table class=" table table-striped">
+                <thead><tr><td>ID</td><td class="wrap">暱稱</td><td>登入時間</td></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <!--Message-->
+            <div class="col-md-8 col-sm-8 message">
+              <table class=" table table-striped">
+              </table>
+            </div>
+          </div>
+
+
+          <!--底部 -->
+          <div class="row footer col-md-8">
+            <form>
+              <div class="col-md-2">
+                <input type="text" class="form-control" placeholder="nickname" id="nickname2">
+              </div>
+              <div class="col-md-8">
+                <input type="text" class="form-control " placeholder="message" id="message">
+              </div>
+              <div class=" col-md-2">
+                <input type="submit" class="login btn btn-default btn-lg btn-block" val="send">
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+
+
+    <script>
+
+      var msg_cnt = 0;
+      var users = {};
+      var socket = null;
+
+
+      function connectServer(name,nickname){
+        if(socket !== null){
+          socket.disconnect();
+        }
+        socket = io('/chat',{'force new connection': true});
+        handleUpdate();
+        socket.emit("addUser",{"name": name,"nickname": nickname});
+      }
+
+      //登入使用者
+      function handleLogin(){
+        $("div.login").submit(function(e){
+          e.preventDefault();
+          if($("#user").val() != "" && $("#nickname").val() != ""){
+            var name = $("#user").val();
+            var nickname = $("#nickname").val();
+            $("#nickname2").val(nickname);
+            connectServer(name, nickname);
+          }
+        });
+      }
+
+      var nickname = "";
+      var name = "";
+
+      $(window).focus(function(){
+        if(socket !==null){
+          socket.emit("idle",{"nickname":nickname});
+          $("#nickname2").val(nickname);
+        }
+      });
+
+      $(window).blur(function(){
+        if(socket !== null){
+          socket.emit("idle",{"nickname":"發呆中("+nickname+")"});
+        }
+      })
+
+
+
+
+      //送出訊息
+      function sendMessage(){
+        $("div.footer form").submit(function(e){
+          e.preventDefault();
+          nickname = $("#nickname2").val();
+          var message = $("#message").val();
+          if(nickname!=""&&message!=""){
+            socket.emit("chat_msg",{"nickname":nickname,"message":message});
+          }
+        });
+      }
+      function handleLostUser(){
+        socket.emit("lost_user",function(m){
+          location.reload();
+        });
+      }
+
+
+      function refreshUsers(msg){
+        $("div.main table:eq(0) tbody").html("");
+          for(var i in msg.userlist){
+            var d = msg.userlist[i];
+            $("<tr></tr>")
+              .append("<td>"+d.name+"</td>")
+              .append("<td class='wrap'>"+d.nickname+"</td>")
+              .append("<td>"+parseTime(d.login_dt)+"</td>")
+              .appendTo("div.main table:eq(0) tbody");
+          }
+      }
+
+
+      //狀態更新
+      function handleUpdate(){
+	//更新發呆資訊
+	socket.on("idle_success",function(msg){
+          refreshUsers(msg);
+        });
+        //註冊成功
+        socket.on("addUser_success",function(msg){
+          name = msg.name;
+          nickname = msg.nickname;
+          $("div.login").hide();
+          $("div.talk").show();
+          $("#message").focus();
+        });
+        //更新傳來訊息
+        socket.on("chat_msg_success_user",function(msg){
+          $("#message").val("");
+        });
+        socket.on("chat_msg_success",function(msg){
+          $("<tr class='msg_row'></tr>")
+            .append("<td class='name'>"+msg.name+"</td>")
+            .append("<td class='message_text'>"+msg.message+"</td>")
+            .append("<td class='t'>"+parseTime(msg.t)+"</td>")
+            .appendTo("div.message table");
+          $("div.message").scrollTop($("div.message").prop('scrollHeight'));
+        });
+        //更新使用者狀態
+        socket.on("users",function(msg){
+          refreshUsers(msg);
+        });
+        socket.on("lost_user",function(msg){
+          connectServer(name, nickname);
+          $("#nickname2").val(nickname);
+        });
+      }
+
+      handleLogin();
+      sendMessage();
+    </script>
+
+  </body>
+</html>
