@@ -1,30 +1,50 @@
 var express = require('express');
 var router = express.Router();
-var parseString = require('xml2js').parseString;
-var request = require('request');
+var fs = require('fs');
 
-
-function getWeather(href,res){
-  request(href, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      parseString(body, function(err,result){
-        var weather = result.cwbopendata.dataset[0].parameterSet[0].parameter[0].parameterValue[0];
-        res.header("Content-Type", "text/plain; charset=utf-8");
-        res.end(weather);
-      });
+function getWeather(location,res){
+  fs.readFile(__dirname+'/../data/weather_'+location+'.txt','utf8',function(err,data){
+    if(err){
+      res.header("Content-Type", "text/plain; charset=utf-8");
+      res.end('error');
+      console.log(err);
+      return;
     }
+    res.header("Content-Type", "text/plain; charset=utf-8");
+    res.end(data);
+    return;
   });
 }
-
-function getWeatherinfoHref(dataid){
-  return 'http://opendata.cwb.gov.tw/opendataapi?dataid='+dataid+'&authorizationkey='+process.env.WEATHER_AUTH_KEY;
-}
-
 
 router.get('/weather/:city', function(req, res, next) {
     switch(req.params.city){
       case  "taipei":
-        getWeather(getWeatherinfoHref('F-C0032-009'),res);
+        getWeather('taipei',res);
+      break;
+      default:
+        res.end("GG");
+    }
+});
+
+
+function getYoubike(res){
+  fs.readFile(__dirname+'/../data/bike_taipei_branch.txt','utf8',function(err,data){
+    if(err){
+      res.header("Content-Type", "text/plain; charset=utf-8");
+      res.end('error');
+      console.log(err);
+      return;
+    }
+    res.header("Content-Type", "text/plain; charset=utf-8");
+    res.end(data);
+    return;
+  });
+}
+
+router.get('/youbike/:stop', function(req, res, next) {
+    switch(req.params.stop){
+      case  "ZhongshanDist":
+        getYoubike(res);
       break;
       default:
         res.end("GG");
