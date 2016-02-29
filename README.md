@@ -1,14 +1,12 @@
-# Node.js Starter Overview
+# aha-robot 介紹
 
-The Node.js Starter demonstrates a simple, reusable Node.js web application based on the Express framework.
+這是放在Bluemix上面的aha robot
 
-## Run the app locally
+## 功能清單
 
-1. [Install Node.js][]
-2. Download and extract the starter code from the Bluemix UI
-3. cd into the app directory
-4. Run `npm install` to install the app's dependencies
-5. Run `npm start` to start the app
-6. Access the running app in a browser at http://localhost:6001
+1. [查詢台北天氣][Taipei Weather]
+2. [查詢龍江南京路口Youbike狀況][Youbike]
+3. 更新機器人語庫
 
-[Install Node.js]: https://nodejs.org/en/download/
+[Taipei Weather]: http://aha-robot.mybluemix.net/v1/weather/taipei
+[Youbike]: http://aha-robot.mybluemix.net/v1/youbike/ZhongshanDist

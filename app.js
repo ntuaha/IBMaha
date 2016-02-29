@@ -11,12 +11,15 @@ var express = require('express');
 // cfenv provides access to your Cloud Foundry environment
 // for more info, see: https://www.npmjs.com/package/cfenv
 var cfenv = require('cfenv');
-var v1 = require('./routes/v1');
+
 // create a new express server
 var app = express();
 
-
+var v1 = require('./routes/v1');
 app.use('/v1/',v1);
+
+var ai = require('./routes/esb/ai');
+app.use('/ai/',ai);
 
 // serve the files out of ./public as our main files
 app.use('/',express.static(__dirname + '/public'));
@@ -78,11 +81,36 @@ setInterval(crawlerTaipeiWeather,60000);
 //Crawler bike
 const zlib = require('zlib');
 
-function getUbikeInfo() {
+function extractSpeiciifcStop(error,body){
+  if(!error){
+    var data = JSON.parse(body);
+    for( var key in data.retVal){
+      var datum = data.retVal[key];
+      var name = datum.sna;
+      var available_bike = +datum.sbi;
+      var available_bike_space = +datum.bemp;
+      if (name === '龍江南京路口'){
+        (function(result){
+          fs.writeFile(__dirname+'/data/bike_taipei_branch.txt','在台北分行附近為龍江南京路口站，目前有'+result.available_bike+"台車，有"+result.available_bike_space+"停腳踏車位",function(err){
+            if(err !== null){
+              console.log(err);
+            }
+          });
+        })({'available_bike': available_bike, 'available_bike_space': available_bike_space});
+      }
+    }
+  }else{
+    console.log(error);
+  }
+}
+
+
+function getUbikeInfo(callback) {
   var options = {'url': "http://data.taipei/youbike"};
   var req = request.get(options);
   req.on('response', function(res) {
     var chunks = [];
+
     res.on('data', function(chunk) {
       chunks.push(chunk);
     });
@@ -90,25 +118,14 @@ function getUbikeInfo() {
     res.on('end', function() {
       var buffer = Buffer.concat(chunks);
       zlib.gunzip(buffer, function(error, decoded) {
-        var body = decoded && decoded.toString();
-        if(!error){
-          var data = JSON.parse(body);
-          for( var key in data.retVal){
-            var datum = data.retVal[key];
-            var name = datum.sna;
-            var avaliable_bike = +datum.sbi;
-            var avaliable_bike_space = +datum.bemp;
-            if (name === '龍江南京路口'){
-              fs.writeFile(__dirname+'/data/bike_taipei_branch.txt','在台北分行附近為龍江南京路口，目前還有'+avaliable_bike+"台車，還有"+avaliable_bike_space+"個空位",function(err){
-                if(err !== null){
-                  console.log(err);
-                }
-              });
-            }
-          }
+        if(error !== null){
+          console.log(error);
+          return;
         }
+        callback(null,decoded && decoded.toString());
       });
     });
+
   });
 
   req.on('error', function(err) {
@@ -117,7 +134,11 @@ function getUbikeInfo() {
 
 }
 
-setInterval(getUbikeInfo,60000);
+function timerGetUbikeInfo(){
+  getUbikeInfo(extractSpeiciifcStop);
+}
+
+setInterval(timerGetUbikeInfo,60000);
 
 
 
