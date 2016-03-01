@@ -51,4 +51,13 @@ router.get('/youbike/:stop', function(req, res, next) {
     }
 });
 
+router.get('/time',function(req,res,next){
+  var d = new Date();
+  var hour = d.getHours();
+  hour = (hour>12)?(hour-12):hour;
+  var min = d.getMinutes();
+  min = (min<10)?'0'+min:min;
+  res.end("現在是"+hour+"點"+min+"分");
+});
+
 module.exports = router;
