@@ -53,8 +53,9 @@ router.get('/youbike/:stop', function(req, res, next) {
 
 router.get('/time',function(req,res,next){
   var d = new Date();
-  var hour = d.getHours();
-  hour = (hour>12)?(hour-12):hour;
+  var hour = d.getHours()+d.getTimezoneOffset()/60 + 8 ;
+  hour = (hour>24)?(hour-24):hour;
+  hour = (hour>12)?(hour-12):hour;  
   var min = d.getMinutes();
   min = (min<10)?'0'+min:min;
   res.end("現在是"+hour+"點"+min+"分");
