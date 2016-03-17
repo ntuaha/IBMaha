@@ -23,6 +23,10 @@ var upload_NAO = makerUploader('機器人語庫.txt',"NAO");
 var upload_IQA = makerUploader('ALL長語庫.txt',"IQA");
 
 
+
+
+
+
 router.post('/editor/NAOHala', upload_NAOHala, function (req, res, next) {
   res.end("NAOHala");
 });

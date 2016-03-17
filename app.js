@@ -19,7 +19,16 @@ var v1 = require('./routes/v1');
 app.use('/v1/',v1);
 
 var ai = require('./routes/esb/ai');
+app.use('/ai/RFAQ',express.static(__dirname + '/data/機器人語庫.txt'));
+app.use('/ai/RHala',express.static(__dirname + '/data/RobotHala.txt'));
+app.use('/ai/MFAQ',express.static(__dirname + '/data/ALL長語庫.txt'));
 app.use('/ai/',ai);
+
+
+
+app.use('/chat',function(req,res,next){
+  res.redirect("http://aha-chat.mybluemix.net/chat/");
+});
 
 // serve the files out of ./public as our main files
 app.use('/',express.static(__dirname + '/public'));
@@ -42,10 +51,6 @@ app.use(function (req, res, next) {
 // setting socket.io
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var funny_chat = require('./routes/esb/chat');
-var chat_io = io.of('/chat').on('connection', function (socket) {
-  funny_chat(socket, chat_io);
-});
 
 
 require('./routes/util.js');

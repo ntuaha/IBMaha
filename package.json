@@ -3,7 +3,8 @@
 	"version": "0.0.1",
 	"description": "aha 2nd robot",
 	"scripts": {
-		"start": "node app.js"
+		"start": "node app.js",
+		"test": "mocha ./tests/test.js"
 	},
 	"dependencies": {
 		"express": "4.12.x",
@@ -16,6 +17,6 @@
 	"license":"CC-BY-NC-SA-4.0",
 	"repository": {},
 	"engines": {
-		"node": "5.7.x"
+		"node": "5.8.x"
 	}
 }
