@@ -4,7 +4,7 @@
 	"description": "aha 2nd robot",
 	"scripts": {
 		"start": "node app.js",
-		"test": "mocha ./test/test.js"
+		"test": "mocha test/test.js"
 	},
 	"dependencies": {
 		"express": "4.12.x",
