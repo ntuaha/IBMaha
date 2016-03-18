@@ -1,5 +1,7 @@
 # aha-robot 介紹
 
+[![Build Status](https://travis-ci.org/ntuaha/IBMaha.svg?branch=master)](https://travis-ci.org/ntuaha/IBMaha)
+
 這是放在Bluemix上面的aha robot
 
 ## 功能清單
