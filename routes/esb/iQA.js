@@ -86,6 +86,14 @@ function getMessageServer(msg,callback){
 
 }
 
+function handleMessage(req,res,next){
+  getMessageServer(req.query.q,function(data){
+    res.json(data);
+  });
+}
+
+
 module.exports = {
-  "getMessageServer": getMessageServer
+  "getMessageServer": getMessageServer,
+  "http": handleMessage
 };

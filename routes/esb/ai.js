@@ -3,6 +3,7 @@ var fs = require('fs');
 const express = require('express');
 var router = express.Router();
 var multer  =   require('multer');
+const iQA = require('iQA');
 
 const DATA_BASEPATH = __dirname+'/../../data/';
 
@@ -38,6 +39,8 @@ router.post('/editor/NAO', upload_NAO, function (req, res, next) {
 router.post('/editor/IQA', upload_IQA, function (req, res, next) {
   res.end("IQA");
 });
+
+router.get('/NAO',iQA.http);
 
 
 module.exports = router;
